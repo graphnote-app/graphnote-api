@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Get, Post, ConflictException } from '@nestjs/common';
 import { UsersService } from './users.service';
 
 @Controller()
@@ -13,7 +13,7 @@ export class UsersController {
 
     if (user != null) {
       console.log("User found id: " + id)
-      throw new BadRequestException()
+      throw new ConflictException()
     } else {
       const user = await this.usersService.create(id)
       return user
