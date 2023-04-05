@@ -22,8 +22,8 @@ import { UsersController } from './users.controller';
 	}), 
 	UsersModule
   ],
-  controllers: [AppController, UsersController],
-  providers: [AppService, UsersService],
+  controllers: [AppController],
+  providers: [AppService],
 },)
 
 export class AppModule {

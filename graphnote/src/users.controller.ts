@@ -1,4 +1,4 @@
-import { Query, Controller, Get, Post, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Get, Post, BadRequestException } from '@nestjs/common';
 import { UsersService } from './users.service';
 
 @Controller()
@@ -6,15 +6,17 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('user')
-  createUser(@Query() query) {
-    const id = query.id
+  async createUser(@Body() body) {
+    const id = body.id
 
-    const success = this.usersService.createUser(id)
+    const user = await this.usersService.findOne(id)
 
-    if (success) {
-      return 'Success'
-    } else {
+    if (user != null) {
+      console.log("User found id: " + id)
       throw new BadRequestException()
+    } else {
+      const user = await this.usersService.create(id)
+      return user
     }
   }
 }
