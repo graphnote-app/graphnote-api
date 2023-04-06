@@ -6,12 +6,18 @@ export class User {
   @PrimaryColumn()
   id: string;
 
-  @Column()
-  firstName: string;
+  @Column({unique: true})
+  email: string;
 
-  @Column()
-  lastName: string;
+  @Column({nullable: true})
+  givenName: string | null;
 
-  @Column({ default: true })
-  isActive: boolean;
+  @Column({nullable: true})
+  familyName: string | null;
+
+  @Column({ type: 'timestamp with time zone' })
+  createdAt: string;
+
+  @Column({ type: 'timestamp with time zone' })
+  modifiedAt: string;
 }

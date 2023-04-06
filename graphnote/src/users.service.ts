@@ -10,12 +10,22 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(id: string): Promise<User> {
-    // return this.usersRepository.create({id})
+  async create(
+    id: string,
+    email: string, 
+    familyName: string | null, 
+    givenName: string | null, 
+    createdAt: string, 
+    modifiedAt: string
+  ): Promise<User> {
+
     const user = new User()
-    user.firstName = "Timber"
-    user.lastName = "Saw"
     user.id = id
+    user.givenName = givenName
+    user.familyName = familyName
+    user.email = email
+    user.modifiedAt = modifiedAt 
+    user.createdAt = createdAt
     return await this.usersRepository.save(user)
   }
 
