@@ -5,6 +5,7 @@ import { UsersService } from './users.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm';
 import { User } from './user.entity';
+import { Message } from './message.entity';
 import { UsersModule } from './users.module';
 import { UsersController } from './users.controller';
 
@@ -17,7 +18,7 @@ import { UsersController } from './users.controller';
 		username: 'postgres',
 		password: '',
 		database: 'postgres',
-		entities: [User],
+		entities: [User, Message],
 		synchronize: true,
 	}), 
 	UsersModule

@@ -5,13 +5,15 @@ import {
   Get, 
   Post, 
   ConflictException, 
-  NotFoundException 
+  NotFoundException,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { SyncService } from './sync.service';
 
 @Controller()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService, private readonly syncService: SyncService) {}
   
   @Get('user')
     async fetchUser(@Query() query) {
@@ -27,15 +29,15 @@ export class UsersController {
 
   @Post('user')
   async createUser(@Body() body) {
-    const id = body.id
-    const givenName = body.givenName
-    const familyName = body.familyName
-    const email = body.email
-    const createdAt = body.createdAt
-    const modifiedAt = body.modifiedAt
-
+    const message = body
+    const contents = JSON.parse(message.contents)
+    const id = contents.id
+    const givenName = contents.givenName
+    const familyName = contents.familyName
+    const email = contents.email
+    const createdAt = contents.createdAt
+    const modifiedAt = contents.modifiedAt
     console.log({body})
-
 
     const user = await this.usersService.findOne(id)
 
@@ -44,8 +46,15 @@ export class UsersController {
       throw new ConflictException()
     } else {
       const user = await this.usersService.create(id, email, familyName, givenName, createdAt, modifiedAt)
+      const createMessageSuccess = await this.syncService.createMessage(message)
       console.log({user})
-      return user
+      console.log({createMessageSuccess})
+      if (createMessageSuccess != null && user != null) {
+        return user
+      } else {
+        throw new InternalServerErrorException()
+      }
+      
     }
   }
 }

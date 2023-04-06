@@ -17,7 +17,7 @@ export class UsersService {
     givenName: string | null, 
     createdAt: string, 
     modifiedAt: string
-  ): Promise<User> {
+  ): Promise<User | null> {
 
     const user = new User()
     user.id = id
