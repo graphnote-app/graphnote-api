@@ -9,9 +9,14 @@ export class Message {
   @Column({ type: 'timestamp with time zone' })
   timestamp: string;
 
-
   @Column()
   type: string;
+
+  @Column()
+  action: string;
+
+  @Column()
+  isSynced: boolean
 
   @Column()
   contents: string;
