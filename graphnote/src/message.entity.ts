@@ -23,4 +23,7 @@ export class Message {
 
   @Column()
   contents: string;
+
+  @Column({ type: 'timestamp with time zone' })
+  serverReceivedTime: string;
 }

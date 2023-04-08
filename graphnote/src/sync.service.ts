@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { MoreThan } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Message } from './message.entity';
@@ -21,6 +22,7 @@ export type SyncMessage = {
     action: SyncMessageAction;
     isSynced: boolean;
     contents: string;
+    serverReceivedTime: string;
 }
 
 Injectable()
@@ -35,13 +37,15 @@ export class SyncService {
   ) {}
 
   async fetchMessageIDs(user: User, lastSyncTime: string): Promise<Array<string> | null> {
+  	console.log(lastSyncTime.replace(" ", "T"))
   	return (await this.messagesRepository
   		.find({
   			select: {
         	id: true,
     		},
     		where: {
-    			user: user.id
+    			user: user.id,
+    			serverReceivedTime: MoreThan(lastSyncTime)
     		},
   		})).map(item => item.id)
   }
@@ -57,8 +61,10 @@ export class SyncService {
 		messageEntity.action = message.action
 		messageEntity.isSynced = message.isSynced
 		messageEntity.contents = message.contents
+		messageEntity.serverReceivedTime = message.serverReceivedTime
 
 		var success = await this.messagesRepository.save(messageEntity) != null
+		console.log(await this.messagesRepository.findOneBy({id: message.id}))
 
 		// Temp process events here. Later queue them up.
 		if (message.type == 'document') {

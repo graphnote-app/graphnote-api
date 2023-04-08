@@ -29,11 +29,12 @@ export class UsersController {
 
   @Get('message/ids')
   async fetchMessageIDs(@Query() query) {
+    console.log({query})
     const user = query.user
     const lastSyncTime = query.last
 
     const ids = await this.syncService.fetchMessageIDs(user, lastSyncTime)
-    const syncTime = Date.now()
+    const syncTime = new Date().toISOString()
     if (ids != null) {
       return await JSON.stringify({ids: ids, lastSyncTime: syncTime})
     } else {
@@ -52,7 +53,8 @@ export class UsersController {
     const action = message.action
     const isSynced = message.isSynced
     const contents = message.contents
-    const messageObject = {id, user, timestamp, type, action, isSynced, contents}
+    const serverReceivedTime = new Date().toISOString()
+    const messageObject = {id, user, timestamp, type, action, isSynced, contents, serverReceivedTime}
     const createMessageSuccess = await this.syncService.createMessage(messageObject)
     console.log({createMessageSuccess})
     return createMessageSuccess
