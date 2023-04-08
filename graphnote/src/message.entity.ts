@@ -6,6 +6,9 @@ export class Message {
   @PrimaryColumn()
   id: string;
 
+  @Column()
+  user: string;
+
   @Column({ type: 'timestamp with time zone' })
   timestamp: string;
 

@@ -15,6 +15,7 @@ enum SyncMessageAction {
 
 export type SyncMessage = {
     id: string;
+    user: string;
     timestamp: string;
     type: SyncMessageType;
     action: SyncMessageAction;
@@ -33,17 +34,30 @@ export class SyncService {
     private usersRepository: Repository<User>,
   ) {}
 
+  async fetchMessageIDs(user: User, lastSyncTime: string): Promise<Array<string> | null> {
+  	return (await this.messagesRepository
+  		.find({
+  			select: {
+        	id: true,
+    		},
+    		where: {
+    			user: user.id
+    		},
+  		})).map(item => item.id)
+  }
+
   
 	async createMessage(message: SyncMessage): Promise<boolean> {
 		console.log("createMessage")
 		let messageEntity = new Message()
 		messageEntity.id = message.id
+		messageEntity.user = message.user
 		messageEntity.timestamp = message.timestamp
 		messageEntity.type = message.type
 		messageEntity.action = message.action
 		messageEntity.isSynced = message.isSynced
 		messageEntity.contents = message.contents
-		
+
 		var success = await this.messagesRepository.save(messageEntity) != null
 
 		// Temp process events here. Later queue them up.
