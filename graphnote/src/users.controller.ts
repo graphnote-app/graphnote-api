@@ -29,13 +29,13 @@ export class UsersController {
 
   @Post('message')
   async createMessage(@Body() body) {
-    const message = body
+    const message = body as SyncMessage
     const id = message.id
     const type = message.type
     const timestamp = message.timestamp
     const action = message.action
     const isSynced = message.isSynced
-    const contents = JSON.parse(message.contents)
+    const contents = message.contents
     const messageObject = {id, timestamp, type, action, isSynced, contents}
     const createMessageSuccess = await this.syncService.createMessage(messageObject)
     console.log({createMessageSuccess})

@@ -51,7 +51,7 @@ export class SyncService {
 			if (message.action == 'create') {
 				// Create the document on the server now!
 				console.log(message.contents)
-				const _doc = JSON.parse(JSON.stringify(message.contents))
+				const _doc = JSON.parse(message.contents)
 				const doc = new Document()
 		    doc.id = _doc.id
 		    doc.title = _doc.title
@@ -66,7 +66,7 @@ export class SyncService {
 			}
 		} else if (message.type == 'user') {
 			if (message.action == 'create') {
-		    const contents = JSON.parse(JSON.stringify(message.contents))
+		    const contents = JSON.parse(message.contents)
 		    const id = contents.id
 		    const givenName = contents.givenName
 		    const familyName = contents.familyName
