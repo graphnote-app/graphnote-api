@@ -42,34 +42,34 @@ export class UsersController {
     return createMessageSuccess
   }
 
-  @Post('user')
-  async createUser(@Body() body) {
-    const message = body
-    const contents = JSON.parse(message.contents)
-    const id = contents.id
-    const givenName = contents.givenName
-    const familyName = contents.familyName
-    const email = contents.email
-    const createdAt = contents.createdAt
-    const modifiedAt = contents.modifiedAt
-    console.log({body})
+  // @Post('user')
+  // async createUser(@Body() body) {
+  //   const message = body
+  //   const contents = JSON.parse(message.contents)
+  //   const id = contents.id
+  //   const givenName = contents.givenName
+  //   const familyName = contents.familyName
+  //   const email = contents.email
+  //   const createdAt = contents.createdAt
+  //   const modifiedAt = contents.modifiedAt
+  //   console.log({body})
 
-    const user = await this.usersService.findOne(id)
+  //   const user = await this.usersService.findOne(id)
 
-    if (user != null) {
-      console.log("User found id: " + id)
-      throw new ConflictException()
-    } else {
-      const user = await this.usersService.create(id, email, familyName, givenName, createdAt, modifiedAt)
-      const createMessageSuccess = await this.syncService.createMessage(message)
-      console.log({user})
-      console.log({createMessageSuccess})
-      if (createMessageSuccess != null && user != null) {
-        return user
-      } else {
-        throw new InternalServerErrorException()
-      }
+  //   if (user != null) {
+  //     console.log("User found id: " + id)
+  //     throw new ConflictException()
+  //   } else {
+  //     const user = await this.usersService.create(id, email, familyName, givenName, createdAt, modifiedAt)
+  //     const createMessageSuccess = await this.syncService.createMessage(message)
+  //     console.log({user})
+  //     console.log({createMessageSuccess})
+  //     if (createMessageSuccess != null && user != null) {
+  //       return user
+  //     } else {
+  //       throw new InternalServerErrorException()
+  //     }
       
-    }
-  }
+  //   }
+  // }
 }

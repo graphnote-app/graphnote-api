@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Message } from './message.entity';
 import { Document } from './document.entity';
+import { User } from './user.entity';
 
 enum SyncMessageType {
   document = "document"
@@ -28,7 +29,8 @@ export class SyncService {
     private messagesRepository: Repository<Message>,
     @InjectRepository(Document)
     private documentsRepository: Repository<Document>,
-
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
   ) {}
 
   
@@ -61,6 +63,33 @@ export class SyncService {
 
 			} else {
 				success = false
+			}
+		} else if (message.type == 'user') {
+			if (message.action == 'create') {
+		    const contents = JSON.parse(JSON.stringify(message.contents))
+		    const id = contents.id
+		    const givenName = contents.givenName
+		    const familyName = contents.familyName
+		    const email = contents.email
+		    const createdAt = contents.createdAt
+		    const modifiedAt = contents.modifiedAt
+				const user = await this.usersRepository.findOneBy({id})
+
+		    if (user != null) {
+		      console.log("User found id: " + id)
+		      success = false
+		    } else {
+		    	let user = new User()
+		    	user.id = id 
+		    	user.email = email
+		    	user.familyName = familyName
+		    	user.givenName = givenName
+		    	user.createdAt = createdAt
+		    	user.modifiedAt = modifiedAt
+		      success = success && await this.usersRepository.create(user) != null
+		    }
+			} else {
+				success =false
 			}
 		} else {
 			success = false
