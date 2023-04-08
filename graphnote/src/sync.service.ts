@@ -86,7 +86,9 @@ export class SyncService {
 		    	user.givenName = givenName
 		    	user.createdAt = createdAt
 		    	user.modifiedAt = modifiedAt
-		      success = success && await this.usersRepository.create(user) != null
+		    	console.log({user})
+		      success = success && await this.usersRepository.save(user) != null
+		      console.log({success})
 		    }
 			} else {
 				success =false
