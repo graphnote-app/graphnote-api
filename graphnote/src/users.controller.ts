@@ -34,12 +34,19 @@ export class UsersController {
     const lastSyncTime = query.last
 
     const ids = await this.syncService.fetchMessageIDs(user, lastSyncTime)
-    const syncTime = new Date().toISOString()
+    console.log({ids})
+    const syncTime = new Date().getTime()
     if (ids != null) {
       return await JSON.stringify({ids: ids, lastSyncTime: syncTime})
     } else {
       throw new NotFoundException()  
     }
+  }
+
+  @Get('message')
+  async fetchMessage(@Query() query) {
+    const id = query.id
+    return await this.syncService.fetchMessage(id)
   }
 
   @Post('message')
@@ -53,8 +60,10 @@ export class UsersController {
     const action = message.action
     const isSynced = message.isSynced
     const contents = message.contents
-    const serverReceivedTime = new Date().toISOString()
-    const messageObject = {id, user, timestamp, type, action, isSynced, contents, serverReceivedTime}
+    console.log({timestamp})
+    const serverReceivedTime = new Date().getTime()
+    console.log({serverReceivedTime})
+    const messageObject = new SyncMessage(id, user, timestamp, type, action, isSynced, contents, serverReceivedTime)
     const createMessageSuccess = await this.syncService.createMessage(messageObject)
     console.log({createMessageSuccess})
     return createMessageSuccess

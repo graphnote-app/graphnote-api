@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Message } from './message.entity';
 import { Document } from './document.entity';
 import { User } from './user.entity';
+import { UserDTO } from './users.service';
 
 enum SyncMessageType {
   document = "document"
@@ -14,15 +15,35 @@ enum SyncMessageAction {
   create = "create"
 }
 
-export type SyncMessage = {
+export class SyncMessage {
     id: string;
     user: string;
-    timestamp: string;
+    timestamp: number;
     type: SyncMessageType;
     action: SyncMessageAction;
     isSynced: boolean;
     contents: string;
-    serverReceivedTime: string;
+    serverReceivedTime: number;
+
+    constructor(
+    	id: string, 
+    	user: string,
+    	timestamp: number,
+    	type: SyncMessageType,
+    	action: SyncMessageAction,
+    	isSynced: boolean,
+    	contents: string,
+    	serverReceivedTime: number
+    ) {
+    	this.id = id
+    	this.user = user
+    	this.timestamp = timestamp
+    	this.type = type
+    	this.action = action 
+    	this.isSynced = isSynced
+    	this.contents = contents
+    	this.serverReceivedTime = serverReceivedTime
+    }
 }
 
 Injectable()
@@ -36,18 +57,56 @@ export class SyncService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async fetchMessageIDs(user: User, lastSyncTime: string): Promise<Array<string> | null> {
-  	console.log(lastSyncTime.replace(" ", "T"))
-  	return (await this.messagesRepository
-  		.find({
-  			select: {
-        	id: true,
-    		},
-    		where: {
-    			user: user.id,
-    			serverReceivedTime: MoreThan(lastSyncTime)
-    		},
-  		})).map(item => item.id)
+  async fetchMessageIDs(user: UserDTO, lastSyncTime: number | null): Promise<Array<string> | null> {
+  	console.log(lastSyncTime)
+  	if (lastSyncTime == null) {
+			return (await this.messagesRepository
+	  		.find({
+	  			select: {
+	        	id: true,
+	    		},
+	    		where: {
+	    			user: user.id,
+	    		},
+	  		})).map(item => item.id)	
+  	} else {
+  		const last = new Date(lastSyncTime / 1).toISOString()
+  		console.log({last})
+	  	return (await this.messagesRepository
+	  		.find({
+	  			select: {
+	        	id: true,
+	    		},
+	    		where: {
+	    			user: user.id,
+	    			serverReceivedTime: MoreThan(last)
+	    		},
+	  		})).map(item => item.id)	
+  	}	
+  }
+
+  async fetchMessage(id: string): Promise<SyncMessage | null> {
+  	console.log({id})
+  	const messages = await this.messagesRepository.find({where: {id: id}})
+
+  	if (messages.length > 0) {
+  		const message = messages[0]
+  		const messageOut = new SyncMessage(
+  			message.id,
+  			message.user, 
+  			new Date(message.timestamp).getTime(),
+  			message.type as SyncMessageType,
+  			message.action as SyncMessageAction,
+  			message.isSynced,
+  			message.contents,
+  			new Date(message.serverReceivedTime).getTime()
+  		)
+  		console.log({messageOut})
+  		return messageOut
+  	} else {
+  		return null	
+  	}
+
   }
 
   
@@ -56,12 +115,14 @@ export class SyncService {
 		let messageEntity = new Message()
 		messageEntity.id = message.id
 		messageEntity.user = message.user
-		messageEntity.timestamp = message.timestamp
+		messageEntity.timestamp = new Date(message.timestamp / 1).toISOString()
 		messageEntity.type = message.type
 		messageEntity.action = message.action
-		messageEntity.isSynced = message.isSynced
+		messageEntity.isSynced = true
 		messageEntity.contents = message.contents
-		messageEntity.serverReceivedTime = message.serverReceivedTime
+		messageEntity.serverReceivedTime = new Date(message.serverReceivedTime / 1).toISOString()
+
+		console.log({messageEntity})
 
 		var success = await this.messagesRepository.save(messageEntity) != null
 		console.log(await this.messagesRepository.findOneBy({id: message.id}))
@@ -76,8 +137,8 @@ export class SyncService {
 		    doc.id = _doc.id
 		    doc.title = _doc.title
 		    doc.workspace = _doc.workspace
-		    doc.modifiedAt = _doc.modifiedAt 
-		    doc.createdAt = _doc.createdAt
+		    doc.modifiedAt = new Date(_doc.modifiedAt / 1).toISOString()
+		    doc.createdAt = new Date(_doc.createdAt / 1).toISOString()
 		    console.log({doc})
 		    success = success && await this.documentsRepository.save(doc) != null
 
@@ -91,8 +152,8 @@ export class SyncService {
 		    const givenName = contents.givenName
 		    const familyName = contents.familyName
 		    const email = contents.email
-		    const createdAt = contents.createdAt
-		    const modifiedAt = contents.modifiedAt
+		    const createdAt = new Date(contents.createdAt / 1).toISOString()
+		    const modifiedAt = new Date(contents.modifiedAt / 1).toISOString()
 				const user = await this.usersRepository.findOneBy({id})
 
 		    if (user != null) {
@@ -104,8 +165,8 @@ export class SyncService {
 		    	user.email = email
 		    	user.familyName = familyName
 		    	user.givenName = givenName
-		    	user.createdAt = createdAt
 		    	user.modifiedAt = modifiedAt
+		    	user.createdAt = createdAt
 		    	console.log({user})
 		      success = success && await this.usersRepository.save(user) != null
 		      console.log({success})
