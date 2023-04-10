@@ -6,9 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm';
 import { User } from './user.entity';
 import { Message } from './message.entity';
+import { Workspace } from './workspace.entity';
 import { Document } from './document.entity';
 import { UsersModule } from './users.module';
-import { UsersController } from './users.controller';
+import { MessageController } from './message.controller';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { UsersController } from './users.controller';
 		username: 'postgres',
 		password: '',
 		database: 'postgres',
-		entities: [User, Message, Document],
+		entities: [User, Message, Document, Workspace],
 		synchronize: true,
 	}), 
 	UsersModule

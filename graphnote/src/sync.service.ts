@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Message } from './message.entity';
 import { Document } from './document.entity';
+import { Workspace, WorkspaceDTO } from './workspace.entity';
 import { User } from './user.entity';
 import { UserDTO } from './users.service';
 
@@ -55,6 +56,8 @@ export class SyncService {
     private documentsRepository: Repository<Document>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Workspace)
+    private workspaceRepository: Repository<Workspace>,
   ) {}
 
   async fetchMessageIDs(user: UserDTO, lastSyncTime: number | null): Promise<Array<string> | null> {
@@ -107,6 +110,19 @@ export class SyncService {
   		return null	
   	}
 
+  }
+
+  async createWorkspace(workspace: WorkspaceDTO): Promise<boolean> {
+  	console.log({workspace})
+  	let workspaceEntity = new Workspace()
+		workspaceEntity.id = workspace.id
+		workspaceEntity.title = workspace.title
+		workspaceEntity.user = workspace.user
+		workspaceEntity.labels = workspace.labels
+		workspaceEntity.documents = workspace.documents
+		workspaceEntity.createdAt = workspace.createdAt
+		workspaceEntity.modifiedAt = workspace.modifiedAt
+		return await this.workspaceRepository.save(workspaceEntity) != null
   }
 
   
@@ -171,9 +187,29 @@ export class SyncService {
 		      success = success && await this.usersRepository.save(user) != null
 		      console.log({success})
 		    }
+
 			} else {
-				success =false
+				success = false
 			}
+		} else if (message.type == 'workspace') {
+	  	if (message.action == 'create') {
+	  		const contents = JSON.parse(message.contents)
+	  		console.log("CONTENTS")
+	  		console.log({contents})
+	  		const workspace = new WorkspaceDTO(
+	  			contents.id,
+	  			contents.title,
+	  			contents.user.id,
+	  			contents.labels.map(label => label.id),
+	  			contents.documents.map(doc => doc.id),
+	  			new Date(contents.createdAt).toISOString(),
+	  			new Date(contents.modifiedAt).toISOString()
+	  		)
+	  		
+	  		success = success && await this.createWorkspace(workspace) != null
+	  	} else {
+	  		success = false
+	  	}
 		} else {
 			success = false
 		}
