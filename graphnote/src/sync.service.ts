@@ -199,7 +199,7 @@ export class SyncService {
 	  		const workspace = new WorkspaceDTO(
 	  			contents.id,
 	  			contents.title,
-	  			contents.user.id,
+	  			contents.user,
 	  			contents.labels.map(label => label.id),
 	  			contents.documents.map(doc => doc.id),
 	  			new Date(contents.createdAt).toISOString(),
