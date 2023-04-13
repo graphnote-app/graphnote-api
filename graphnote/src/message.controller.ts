@@ -51,6 +51,7 @@ export class MessageController {
 
   @Post('message')
   async createMessage(@Body() body) {
+    console.log({body})
     const message = body as SyncMessage
     console.log({message})
     const id = message.id

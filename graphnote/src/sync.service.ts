@@ -158,6 +158,25 @@ export class SyncService {
 		    console.log({doc})
 		    success = success && await this.documentsRepository.save(doc) != null
 
+		  } else if (message.action == 'update') {
+		  	
+				const keyValues = JSON.parse(message.contents)
+				const id = keyValues["id"]
+				console.log({id})
+				const doc = await this.documentsRepository.findOneBy({id})
+				if (doc != null) {
+					console.log({doc})
+					console.log(Object.keys(keyValues))
+					console.log(Object.values(keyValues))
+			    doc[Object.keys(keyValues)[1]] = Object.values(keyValues)[1]
+			    doc.modifiedAt = new Date().toISOString()
+
+			    console.log({doc})
+
+				} else {
+					success = false
+				}
+		    success = success && await this.documentsRepository.save(doc) != null
 			} else {
 				success = false
 			}
