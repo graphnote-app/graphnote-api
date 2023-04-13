@@ -31,7 +31,7 @@ export class MessageController {
   async fetchMessageIDs(@Query() query) {
     console.log({query})
     const user = query.user
-    const lastSyncTime = query.last
+    const lastSyncTime = new Date(query.last / 1).toISOString()
 
     const ids = await this.syncService.fetchMessageIDs(user, lastSyncTime)
     console.log({ids})
@@ -51,7 +51,6 @@ export class MessageController {
 
   @Post('message')
   async createMessage(@Body() body) {
-    console.log({body})
     const message = body as SyncMessage
     console.log({message})
     const id = message.id
@@ -61,8 +60,7 @@ export class MessageController {
     const action = message.action
     const isSynced = message.isSynced
     const contents = message.contents
-    console.log({timestamp})
-    const serverReceivedTime = new Date().getTime()
+    const serverReceivedTime = new Date().toISOString()
     console.log({serverReceivedTime})
     const messageObject = new SyncMessage(id, user, timestamp, type, action, isSynced, contents, serverReceivedTime)
     const createMessageSuccess = await this.syncService.createMessage(messageObject)

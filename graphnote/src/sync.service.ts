@@ -24,7 +24,7 @@ export class SyncMessage {
     action: SyncMessageAction;
     isSynced: boolean;
     contents: string;
-    serverReceivedTime: number;
+    serverReceivedTime: string;
 
     constructor(
     	id: string, 
@@ -34,7 +34,7 @@ export class SyncMessage {
     	action: SyncMessageAction,
     	isSynced: boolean,
     	contents: string,
-    	serverReceivedTime: number
+    	serverReceivedTime: string
     ) {
     	this.id = id
     	this.user = user
@@ -60,7 +60,7 @@ export class SyncService {
     private workspaceRepository: Repository<Workspace>,
   ) {}
 
-  async fetchMessageIDs(user: UserDTO, lastSyncTime: number | null): Promise<Array<string> | null> {
+  async fetchMessageIDs(user: UserDTO, lastSyncTime: string | null): Promise<Array<string> | null> {
   	console.log(lastSyncTime)
   	if (lastSyncTime == null) {
 			return (await this.messagesRepository
@@ -73,8 +73,6 @@ export class SyncService {
 	    		},
 	  		})).map(item => item.id)	
   	} else {
-  		const last = new Date(lastSyncTime / 1).toISOString()
-  		console.log({last})
 	  	return (await this.messagesRepository
 	  		.find({
 	  			select: {
@@ -82,7 +80,7 @@ export class SyncService {
 	    		},
 	    		where: {
 	    			user: user.id,
-	    			serverReceivedTime: MoreThan(last)
+	    			serverReceivedTime: MoreThan(lastSyncTime)
 	    		},
 	  		})).map(item => item.id)	
   	}	
@@ -102,7 +100,7 @@ export class SyncService {
   			message.action as SyncMessageAction,
   			message.isSynced,
   			message.contents,
-  			new Date(message.serverReceivedTime).getTime()
+  			new Date(message.serverReceivedTime).toISOString()
   		)
   		console.log({messageOut})
   		return messageOut
@@ -127,7 +125,6 @@ export class SyncService {
 
   
 	async createMessage(message: SyncMessage): Promise<boolean> {
-		console.log("createMessage")
 		let messageEntity = new Message()
 		messageEntity.id = message.id
 		messageEntity.user = message.user
@@ -136,7 +133,7 @@ export class SyncService {
 		messageEntity.action = message.action
 		messageEntity.isSynced = true
 		messageEntity.contents = message.contents
-		messageEntity.serverReceivedTime = new Date(message.serverReceivedTime / 1).toISOString()
+		messageEntity.serverReceivedTime = message.serverReceivedTime
 
 		console.log({messageEntity})
 
@@ -147,7 +144,6 @@ export class SyncService {
 		if (message.type == 'document') {
 			if (message.action == 'create') {
 				// Create the document on the server now!
-				console.log(message.contents)
 				const _doc = JSON.parse(message.contents)
 				const doc = new Document()
 		    doc.id = _doc.id
@@ -165,13 +161,15 @@ export class SyncService {
 				console.log({id})
 				const doc = await this.documentsRepository.findOneBy({id})
 				if (doc != null) {
-					console.log({doc})
-					console.log(Object.keys(keyValues))
-					console.log(Object.values(keyValues))
-			    doc[Object.keys(keyValues)[1]] = Object.values(keyValues)[1]
-			    doc.modifiedAt = new Date().toISOString()
+					console.log("timestamp:", message.timestamp)
+					console.log("modifiedAt:", doc.modifiedAt)
+					if (new Date(message.timestamp) > new Date(doc.modifiedAt)) {
+						doc["title"] = keyValues["content"]["title"]
+				    doc.modifiedAt = new Date(message.timestamp / 1).toISOString()
 
-			    console.log({doc})
+				    console.log({doc})
+						success = success && await this.documentsRepository.save(doc) != null	
+					}
 
 				} else {
 					success = false
@@ -213,8 +211,6 @@ export class SyncService {
 		} else if (message.type == 'workspace') {
 	  	if (message.action == 'create') {
 	  		const contents = JSON.parse(message.contents)
-	  		console.log("CONTENTS")
-	  		console.log({contents})
 	  		const workspace = new WorkspaceDTO(
 	  			contents.id,
 	  			contents.title,
