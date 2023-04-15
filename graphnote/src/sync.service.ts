@@ -7,6 +7,8 @@ import { Document } from './document.entity';
 import { Workspace, WorkspaceDTO } from './workspace.entity';
 import { User } from './user.entity';
 import { UserDTO } from './users.service';
+import { Label, LabelDTO } from './label.entity';
+import { LabelLink, LabelLinkDTO } from './labelLink.entity';
 
 enum SyncMessageType {
   document = "document"
@@ -58,6 +60,10 @@ export class SyncService {
     private usersRepository: Repository<User>,
     @InjectRepository(Workspace)
     private workspaceRepository: Repository<Workspace>,
+    @InjectRepository(Label)
+    private labelRepository: Repository<Label>,
+    @InjectRepository(LabelLink)
+    private labelLinkRepository: Repository<LabelLink>,
   ) {}
 
   async fetchMessageIDs(user: UserDTO, lastSyncTime: string | null): Promise<Array<string> | null> {
@@ -135,10 +141,7 @@ export class SyncService {
 		messageEntity.contents = message.contents
 		messageEntity.serverReceivedTime = new Date(message.serverReceivedTime / 1).toISOString()
 
-		console.log({messageEntity})
-
 		var success = await this.messagesRepository.save(messageEntity) != null
-		console.log(await this.messagesRepository.findOneBy({id: message.id}))
 
 		// Temp process events here. Later queue them up.
 		if (message.type == 'document') {
@@ -221,10 +224,15 @@ export class SyncService {
 	  			new Date(contents.modifiedAt).toISOString()
 	  		)
 	  		
-	  		success = success && await this.createWorkspace(workspace) != null
+	  		success = success && await this.createWorkspace(workspace)
 	  	} else {
 	  		success = false
 	  	}
+
+	  } else if (message.type == 'label') {
+	  	success = await this.processLabel(message)
+	  } else if (message.type == 'labelLink') {
+	  	success = await this.processLabelLink(message)
 		} else {
 			success = false
 		}
@@ -235,5 +243,63 @@ export class SyncService {
 		}
 
 		return success
+	}
+
+	async processLabel(message: SyncMessage): Promise<boolean> {
+		if (message.action == 'create') {
+			const contents = JSON.parse(message.contents)
+			const label = new LabelDTO(
+				contents.id,
+				contents.title,
+				contents.workspace,
+				contents.color,
+				new Date(contents.createdAt).toISOString(),
+  			new Date(contents.modifiedAt).toISOString()
+			)
+  		
+  		return await this.createLabel(label)
+		} else {
+			return false
+		}
+	}
+
+	async createLabel(label: LabelDTO): Promise<boolean> {
+		const labelEntity = new Label()
+		labelEntity.id = label.id
+		labelEntity.title = label.title
+		labelEntity.workspace = label.workspace
+		labelEntity.color = label.color
+		labelEntity.createdAt = label.createdAt
+		labelEntity.modifiedAt = label.modifiedAt
+		return await this.labelRepository.save(labelEntity) != null
+	}
+
+	async processLabelLink(message: SyncMessage): Promise<boolean> {
+		if (message.action == 'create') {
+			const contents = JSON.parse(message.contents)
+			const labelLink = new LabelLinkDTO(
+				contents.id,
+				contents.label,
+				contents.workspace,
+				contents.document,
+				new Date(contents.createdAt).toISOString(),
+  			new Date(contents.modifiedAt).toISOString()
+			)
+  		
+  		return await this.createLabelLink(labelLink)
+		} else {
+			return false
+		}
+	}
+
+	async createLabelLink(labelLink: LabelLinkDTO): Promise<boolean> {
+		const labelEntity = new LabelLink()
+		labelEntity.id = labelLink.id
+		labelEntity.label = labelLink.label
+		labelEntity.workspace = labelLink.workspace
+		labelEntity.document = labelLink.document
+		labelEntity.createdAt = labelLink.createdAt
+		labelEntity.modifiedAt = labelLink.modifiedAt
+		return await this.labelLinkRepository.save(labelEntity) != null
 	}
 }

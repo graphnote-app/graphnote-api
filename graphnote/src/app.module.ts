@@ -10,6 +10,8 @@ import { Workspace } from './workspace.entity';
 import { Document } from './document.entity';
 import { UsersModule } from './users.module';
 import { MessageController } from './message.controller';
+import { Label } from './label.entity';
+import { LabelLink } from './labelLink.entity';
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { MessageController } from './message.controller';
 		username: 'postgres',
 		password: '',
 		database: 'postgres',
-		entities: [User, Message, Document, Workspace],
+		entities: [User, Message, Document, Workspace, Label, LabelLink],
 		synchronize: true,
 	}), 
 	UsersModule
