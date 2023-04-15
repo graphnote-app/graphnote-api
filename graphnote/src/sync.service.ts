@@ -24,7 +24,7 @@ export class SyncMessage {
     action: SyncMessageAction;
     isSynced: boolean;
     contents: string;
-    serverReceivedTime: string;
+    serverReceivedTime: number;
 
     constructor(
     	id: string, 
@@ -34,7 +34,7 @@ export class SyncMessage {
     	action: SyncMessageAction,
     	isSynced: boolean,
     	contents: string,
-    	serverReceivedTime: string
+    	serverReceivedTime: number
     ) {
     	this.id = id
     	this.user = user
@@ -100,7 +100,7 @@ export class SyncService {
   			message.action as SyncMessageAction,
   			message.isSynced,
   			message.contents,
-  			new Date(message.serverReceivedTime).toISOString()
+  			new Date(message.serverReceivedTime).getTime()
   		)
   		console.log({messageOut})
   		return messageOut
@@ -133,7 +133,7 @@ export class SyncService {
 		messageEntity.action = message.action
 		messageEntity.isSynced = true
 		messageEntity.contents = message.contents
-		messageEntity.serverReceivedTime = message.serverReceivedTime
+		messageEntity.serverReceivedTime = new Date(message.serverReceivedTime / 1).toISOString()
 
 		console.log({messageEntity})
 
