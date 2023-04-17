@@ -9,6 +9,7 @@ import { User } from './user.entity';
 import { UserDTO } from './users.service';
 import { Label, LabelDTO } from './label.entity';
 import { LabelLink, LabelLinkDTO } from './labelLink.entity';
+import { UsersService } from './users.service';
 
 enum SyncMessageType {
   document = "document"
@@ -25,6 +26,7 @@ export class SyncMessage {
     type: SyncMessageType;
     action: SyncMessageAction;
     isSynced: boolean;
+    isApplied: boolean;
     contents: string;
     serverReceivedTime: number;
 
@@ -35,6 +37,7 @@ export class SyncMessage {
     	type: SyncMessageType,
     	action: SyncMessageAction,
     	isSynced: boolean,
+    	isApplied: boolean,
     	contents: string,
     	serverReceivedTime: number
     ) {
@@ -44,6 +47,7 @@ export class SyncMessage {
     	this.type = type
     	this.action = action 
     	this.isSynced = isSynced
+    	this.isApplied = isApplied
     	this.contents = contents
     	this.serverReceivedTime = serverReceivedTime
     }
@@ -64,6 +68,7 @@ export class SyncService {
     private labelRepository: Repository<Label>,
     @InjectRepository(LabelLink)
     private labelLinkRepository: Repository<LabelLink>,
+    private readonly usersService: UsersService
   ) {}
 
   async fetchMessageIDs(user: UserDTO, lastSyncTime: string | null): Promise<Array<string> | null> {
@@ -105,6 +110,7 @@ export class SyncService {
   			message.type as SyncMessageType,
   			message.action as SyncMessageAction,
   			message.isSynced,
+  			false,
   			message.contents,
   			new Date(message.serverReceivedTime).getTime()
   		)

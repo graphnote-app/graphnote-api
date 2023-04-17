@@ -47,7 +47,12 @@ export class MessageController {
   @Get('message')
   async fetchMessage(@Query() query) {
     const id = query.id
-    return await this.syncService.fetchMessage(id)
+    const result = await this.syncService.fetchMessage(id)
+    if (result == null) {
+        throw new NotFoundException()
+    } else {
+      return result
+    }
   }
 
   @Post('message')
@@ -63,7 +68,7 @@ export class MessageController {
     const contents = message.contents
     const serverReceivedTime = new Date().getTime()
     console.log({serverReceivedTime})
-    const messageObject = new SyncMessage(id, user, timestamp, type, action, isSynced, contents, serverReceivedTime)
+    const messageObject = new SyncMessage(id, user, timestamp, type, action, isSynced, false, contents, serverReceivedTime)
     const createMessageSuccess = await this.syncService.createMessage(messageObject)
     console.log({createMessageSuccess})
     return createMessageSuccess
