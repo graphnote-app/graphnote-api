@@ -6,6 +6,7 @@ export class BlockDTO {
   document: string;
   type: string;
   content: string;
+  order: number;
   createdAt: string;
   modifiedAt: string;
 
@@ -14,6 +15,7 @@ export class BlockDTO {
     document: string,
     type: string,
     content: string,
+    order: number,
     createdAt: string,
     modifiedAt: string
   ) {
@@ -21,6 +23,7 @@ export class BlockDTO {
     this.document = document
     this.type = type
     this.content = content
+    this.order = order
     this.createdAt = createdAt
     this.modifiedAt = modifiedAt
   }
@@ -39,6 +42,9 @@ export class Block {
 
   @Column()
   content: string;
+
+  @Column()
+  order: number;
 
   @Column({ type: 'timestamp with time zone' })
   createdAt: string;
