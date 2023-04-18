@@ -271,24 +271,24 @@ export class SyncService {
   		return await this.createBlock(block)
 		} else if (message.action == 'update') {
 			const keyValues = JSON.parse(message.contents)
-				const id = keyValues["id"]
-				console.log({id})
-				const block = await this.blockRepository.findOneBy({id})
-				if (block != null) {
-					console.log("timestamp:", message.timestamp)
-					console.log("modifiedAt:", block.modifiedAt)
-					if (new Date(message.timestamp) > new Date(block.modifiedAt)) {
-						block["content"] = keyValues["content"]
-				    block.modifiedAt = new Date(message.timestamp / 1).toISOString()
+			const id = keyValues["id"]
+			console.log({id})
+			const block = await this.blockRepository.findOneBy({id})
+			if (block != null) {
+				console.log("timestamp:", message.timestamp)
+				console.log("modifiedAt:", block.modifiedAt)
+				if (new Date(message.timestamp) > new Date(block.modifiedAt)) {
+					block["content"] = keyValues["content"]
+			    block.modifiedAt = new Date(message.timestamp / 1).toISOString()
 
-				    console.log({block})
-						success = success && await this.blockRepository.save(block) != null	
-					}
-
+			    console.log({block})
+					return await this.blockRepository.save(block) != null	
 				} else {
-					success = false
+					return false
 				}
-		    success = success && await this.documentsRepository.save(doc) != null
+			} else {
+				return false
+			}
 		} else {
 			return false
 		}
