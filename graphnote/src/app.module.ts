@@ -12,6 +12,7 @@ import { UsersModule } from './users.module';
 import { MessageController } from './message.controller';
 import { Label } from './label.entity';
 import { LabelLink } from './labelLink.entity';
+import { Block } from './block.entity';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { LabelLink } from './labelLink.entity';
 		username: 'postgres',
 		password: '',
 		database: 'postgres',
-		entities: [User, Message, Document, Workspace, Label, LabelLink],
+		entities: [User, Message, Document, Workspace, Label, LabelLink, Block],
 		synchronize: true,
 	}), 
 	UsersModule

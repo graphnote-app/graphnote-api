@@ -9,9 +9,10 @@ import { Message } from './message.entity';
 import { Document } from './document.entity';
 import { Label } from './label.entity';
 import { LabelLink } from './labelLink.entity';
+import { Block } from './block.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Message, Document, Workspace, Label, LabelLink])],
+  imports: [TypeOrmModule.forFeature([User, Message, Document, Workspace, Label, LabelLink, Block])],
   providers: [SyncService, UsersService],
   controllers: [MessageController],
 })

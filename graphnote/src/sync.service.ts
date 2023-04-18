@@ -9,6 +9,7 @@ import { User } from './user.entity';
 import { UserDTO } from './users.service';
 import { Label, LabelDTO } from './label.entity';
 import { LabelLink, LabelLinkDTO } from './labelLink.entity';
+import { Block, BlockDTO } from './block.entity';
 import { UsersService } from './users.service';
 
 enum SyncMessageType {
@@ -68,6 +69,8 @@ export class SyncService {
     private labelRepository: Repository<Label>,
     @InjectRepository(LabelLink)
     private labelLinkRepository: Repository<LabelLink>,
+    @InjectRepository(Block)
+    private blockRepository: Repository<Block>,
     private readonly usersService: UsersService
   ) {}
 
@@ -239,6 +242,8 @@ export class SyncService {
 	  	success = await this.processLabel(message)
 	  } else if (message.type == 'labelLink') {
 	  	success = await this.processLabelLink(message)
+	  } else if (message.type == 'block') {
+	  	success = await this.processBlock(message)
 		} else {
 			success = false
 		}
@@ -249,6 +254,44 @@ export class SyncService {
 		}
 
 		return success
+	}
+
+	async processBlock(message: SyncMessage):Promise <boolean> {
+		if (message.action == 'create') {
+			const contents = JSON.parse(message.contents)
+			const block = new BlockDTO(
+				contents.id,
+				contents.type,
+				contents.document,
+				contents.content,
+				new Date(contents.createdAt).toISOString(),
+  			new Date(contents.modifiedAt).toISOString()
+			)
+  		
+  		return await this.createBlock(block)
+		} else if (message.action == 'update') {
+			const keyValues = JSON.parse(message.contents)
+				const id = keyValues["id"]
+				console.log({id})
+				const block = await this.blockRepository.findOneBy({id})
+				if (block != null) {
+					console.log("timestamp:", message.timestamp)
+					console.log("modifiedAt:", block.modifiedAt)
+					if (new Date(message.timestamp) > new Date(block.modifiedAt)) {
+						block["content"] = keyValues["content"]
+				    block.modifiedAt = new Date(message.timestamp / 1).toISOString()
+
+				    console.log({block})
+						success = success && await this.blockRepository.save(block) != null	
+					}
+
+				} else {
+					success = false
+				}
+		    success = success && await this.documentsRepository.save(doc) != null
+		} else {
+			return false
+		}
 	}
 
 	async processLabel(message: SyncMessage): Promise<boolean> {
@@ -267,6 +310,17 @@ export class SyncService {
 		} else {
 			return false
 		}
+	}
+
+	async createBlock(block: BlockDTO): Promise<boolean> {
+		const blockEntity = new Block()
+		blockEntity.id = block.id
+		blockEntity.type = block.type
+		blockEntity.document = block.document
+		blockEntity.content = block.content
+		blockEntity.createdAt = block.createdAt
+		blockEntity.modifiedAt = block.modifiedAt
+		return await this.blockRepository.save(blockEntity) != null
 	}
 
 	async createLabel(label: LabelDTO): Promise<boolean> {
