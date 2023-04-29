@@ -264,7 +264,8 @@ export class SyncService {
 				contents.type,
 				contents.document,
 				contents.content,
-				contents.order,
+				contents.prev,
+				contents.next,
 				new Date(contents.createdAt).toISOString(),
   			new Date(contents.modifiedAt).toISOString()
 			)
@@ -319,7 +320,8 @@ export class SyncService {
 		blockEntity.type = block.type
 		blockEntity.document = block.document
 		blockEntity.content = block.content
-		blockEntity.order = block.order
+		blockEntity.prev = block.prev
+		blockEntity.next = block.next
 		blockEntity.createdAt = block.createdAt
 		blockEntity.modifiedAt = block.modifiedAt
 		return await this.blockRepository.save(blockEntity) != null
