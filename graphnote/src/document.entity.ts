@@ -6,6 +6,9 @@ export class Document {
   @PrimaryColumn()
   id: string;
 
+  @Column({nullable: true})
+  focused: string;
+
   @Column({ type: 'timestamp with time zone' })
   createdAt: string;
 

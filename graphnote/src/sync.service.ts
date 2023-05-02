@@ -161,6 +161,7 @@ export class SyncService {
 		    doc.id = _doc.id
 		    doc.title = _doc.title
 		    doc.workspace = _doc.workspace
+		    doc.focused = _doc.focused
 		    doc.modifiedAt = new Date(_doc.modifiedAt / 1).toISOString()
 		    doc.createdAt = new Date(_doc.createdAt / 1).toISOString()
 		    console.log({doc})
@@ -176,7 +177,13 @@ export class SyncService {
 					console.log("timestamp:", message.timestamp)
 					console.log("modifiedAt:", doc.modifiedAt)
 					if (new Date(message.timestamp) > new Date(doc.modifiedAt)) {
-						doc["title"] = keyValues["content"]["title"]
+						if ("title" in keyValues["content"]) {
+								doc["title"] = keyValues["content"]["title"]
+						}
+
+						if ("focused" in keyValues["content"]) {
+							doc["focused"] = keyValues["content"]["focused"]
+						}
 				    doc.modifiedAt = new Date(message.timestamp / 1).toISOString()
 
 				    console.log({doc})
