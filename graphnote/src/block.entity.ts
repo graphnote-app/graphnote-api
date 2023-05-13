@@ -8,6 +8,7 @@ export class BlockDTO {
   content: string;
   prev: string;
   next: string;
+  graveyard: boolean;
   createdAt: string;
   modifiedAt: string;
 
@@ -18,6 +19,7 @@ export class BlockDTO {
     content: string,
     prev: string,
     next: string,
+    graveyard: boolean,
     createdAt: string,
     modifiedAt: string
   ) {
@@ -27,6 +29,7 @@ export class BlockDTO {
     this.content = content
     this.prev = prev
     this.next = next
+    this.graveyard = graveyard
     this.createdAt = createdAt
     this.modifiedAt = modifiedAt
   }
@@ -51,6 +54,9 @@ export class Block {
 
   @Column({nullable: true})
   next: string;
+
+  @Column()
+  graveyard: boolean;
 
   @Column({ type: 'timestamp with time zone' })
   createdAt: string;

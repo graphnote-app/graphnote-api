@@ -273,6 +273,7 @@ export class SyncService {
 				contents.content,
 				contents.prev,
 				contents.next,
+				contents.graveyard,
 				new Date(contents.createdAt).toISOString(),
   			new Date(contents.modifiedAt).toISOString()
 			)
@@ -288,6 +289,26 @@ export class SyncService {
 				console.log("modifiedAt:", block.modifiedAt)
 				if (new Date(message.timestamp) > new Date(block.modifiedAt)) {
 					block["content"] = keyValues["content"]
+			    block.modifiedAt = new Date(message.timestamp / 1).toISOString()
+
+			    console.log({block})
+					return await this.blockRepository.save(block) != null	
+				} else {
+					return false
+				}
+			} else {
+				return false
+			}
+		} else if (message.action == 'delete') {
+			const keyValues = JSON.parse(message.contents)
+			const id = keyValues["id"]
+			console.log({id})
+			const block = await this.blockRepository.findOneBy({id})
+			if (block != null) {
+				console.log("timestamp:", message.timestamp)
+				console.log("modifiedAt:", block.modifiedAt)
+				if (new Date(message.timestamp) > new Date(block.modifiedAt)) {
+					block.graveyard = true
 			    block.modifiedAt = new Date(message.timestamp / 1).toISOString()
 
 			    console.log({block})
@@ -329,6 +350,7 @@ export class SyncService {
 		blockEntity.content = block.content
 		blockEntity.prev = block.prev
 		blockEntity.next = block.next
+		blockEntity.graveyard = block.graveyard
 		blockEntity.createdAt = block.createdAt
 		blockEntity.modifiedAt = block.modifiedAt
 		return await this.blockRepository.save(blockEntity) != null
