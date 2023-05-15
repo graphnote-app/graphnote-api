@@ -46,12 +46,10 @@ export class MessageController {
 
   @Post('messages')
   async fetchMessages(@Body() body) {
-    console.log(body)
-    const ids = Array(body['{"messageIds":'])
+    const ids = body["messageIds"]
     var results = []
 
     for (const id of ids) {
-      console.log({id})
       const result = await this.syncService.fetchMessage(id)
       if (result == null) {
           throw new NotFoundException()
