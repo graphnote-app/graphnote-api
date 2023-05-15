@@ -44,18 +44,24 @@ export class MessageController {
     }
   }
 
-  @Get('message')
-  async fetchMessage(@Query() query) {
-    const id = query.id
-    const result = await this.syncService.fetchMessage(id)
-    if (result == null) {
-        throw new NotFoundException()
-    } else {
-      return result
+  @Get('messages')
+  async fetchMessages(@Query() query) {
+    const ids = query.body['messageIds']
+    var results = []
+
+    for (const id of ids) {
+      const result = await this.syncService.fetchMessage(id)
+      if (result == null) {
+          throw new NotFoundException()
+      } else {
+        results.push(result)
+      }  
     }
+
+    return results
   }
 
-  @Post('message')
+  @Post('message/create')
   async createMessage(@Body() body) {
     const message = body as SyncMessage
     console.log({message})
