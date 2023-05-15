@@ -22,7 +22,7 @@ import { Block } from './block.entity';
 		port: 5432,
 		username: 'postgres',
 		password: '',
-		database: process.env.DATABASE || 'postgres',
+		database: process.env.DATABASE_URL || 'postgres',
 		entities: [User, Message, Document, Workspace, Label, LabelLink, Block],
 		synchronize: true,
 	}), 
