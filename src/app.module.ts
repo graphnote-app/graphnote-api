@@ -24,11 +24,11 @@ import { Block } from './block.entity';
 		// username: 'postgres',
 		// password: '',
 		// database: process.env.DATABASE_URL || 'postgres',
-        // dialectOptions: {
-        ssl: {
+        dialectOptions: {
+          ssl: {
               require: true, // This will help you. But you will see nwe error
               rejectUnauthorized: false // This line will fix new error
-            }
+          }
         },
 		entities: [User, Message, Document, Workspace, Label, LabelLink, Block],
 		synchronize: true,
