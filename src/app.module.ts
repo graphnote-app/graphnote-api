@@ -18,11 +18,12 @@ import { Block } from './block.entity';
   imports: [
 	TypeOrmModule.forRoot({
 		type: 'postgres',
-		host: 'localhost',
-		port: 5432,
-		username: 'postgres',
-		password: '',
-		database: process.env.DATABASE_URL || 'postgres',
+		url: process.env.DATABASE_URL,
+		// host: 'localhost',
+		// port: 5432,
+		// username: 'postgres',
+		// password: '',
+		// database: process.env.DATABASE_URL || 'postgres',
 		entities: [User, Message, Document, Workspace, Label, LabelLink, Block],
 		synchronize: true,
 	}), 
