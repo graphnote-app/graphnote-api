@@ -44,7 +44,7 @@ export class MessageController {
     }
   }
 
-  @Get('messages')
+  @Post('messages')
   async fetchMessages(@Query() query) {
     const ids = query.body['messageIds']
     var results = []
