@@ -47,7 +47,8 @@ export class MessageController {
   @Post('messages')
   async fetchMessages(@Body() body) {
     console.log(body)
-    const ids = body['{"messageIds":"']
+    const ids = body["messageIds"]
+    // const ids = body['{"messageIds":"']
     var results = []
 
     for (const id of ids) {
